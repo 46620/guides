@@ -1,5 +1,8 @@
 # Single GPU passthrough
+> Last updated: 2021-09-16
+
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
+
 > This guide is a combination of reading countless guides over time, some of which I sadly can't find links to. I will make sure that I add credits here at some point with everyones page.
 
 ## Requirements
