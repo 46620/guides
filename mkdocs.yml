@@ -13,7 +13,7 @@ nav:
             - 'Tautulli': 'server/plex/tautulli.md'
             - 'Tautulli Scripting': 'server/plex/tautulli_scripting.md'
     - PC:
-        - 'Single GPU vfio': 'machine/1gpu_pass.md'
+        - 'Single GPU vfio': 'machine/linux/1gpu_pass.md'
 
 
 markdown_extensions:
