@@ -8,6 +8,7 @@ nav:
             - 'Installation': 'server/plex/install.md'
             - 'Anime Metadata': 'server/plex/metadata_anime.md'
             - 'Tautulli': 'server/plex/tautulli.md'
+            - 'Tautulli Scripting': 'server/plex/tautulli_scripting.md'
     - PC:
         - 'Single GPU vfio': 'machine/1gpu_pass.md'
 
