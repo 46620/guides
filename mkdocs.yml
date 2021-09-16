@@ -1,0 +1,19 @@
+site_name: 46620 Guides
+theme: material
+nav:
+    - Main: 'index.md'
+    - About: 'about.md'
+    - Server:
+        - Plex:
+            - 'Installation': 'server/plex/install.md'
+            - 'Anime Metadata': 'server/plex/metadata_anime.md'
+    - PC:
+        - 'Single GPU vfio': 'machine/1gpu_pass.md'
+
+
+markdown_extensions:
+    - admonition
+    - pymdownx.details
+    - fontawesome_markdown
+    - pymdownx.highlight
+    - pymdownx.superfences
