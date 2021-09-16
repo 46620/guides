@@ -1,4 +1,7 @@
 site_name: Guides
+site_author: "46620"
+site_description: Random Guides for all
+site_url: https://guides.46620.moe/
 theme: material
 nav:
     - Main: 'index.md'

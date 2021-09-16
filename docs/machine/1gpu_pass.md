@@ -1,7 +1,9 @@
 # Single GPU passthrough
-> Last updated: 2021-09-16
+> Last updated: 2021-09-16 3:55pm EDT
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
+
+# **THIS GUIDE IS NOT FINISHED YET**
 
 !!! warning
     This guide is less of a full "here's how everything works" and more of a jumpstart into this. **PLEASE DO RESEARCH AND DO NOT RELY ON THIS ALONE** All pages I use will be at the bottom in a credits dropdown. 
@@ -25,8 +27,9 @@ sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq
 sudo systemctl enable --now libvirtd.service
 sudo virsh net-autostart default
 sudo virsh net-start default
-sudo usermod -aG kvm,input,libvirt $user
+sudo usermod -aG kvm,input,libvirt <your_name>
 ```
+>Relogging is not required to properly be put in the new groups as the next step has you reboot your system.. which will log you out.
 
 ## Enable & Verify IOMMU
 
@@ -64,10 +67,15 @@ This guide is going to assume that you want to set up a Windows 10 VM, In the fu
 ### Downloading Drivers
 Yes I'm telling you to download the drivers before downloading the OS, why? Cause fuck you, you're gonna forget to download them later and skip to installing. Anyways click [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso) for the latest virtio drivers.
 
-### Downloading windows 10
+### Downloading Windows 10
 Aight now you need a shit OS to install huh? [This](https://www.microsoft.com/en-us/software-download/windows10ISO) page will be where you download Windows 10.
 
 ## Setting up virt manager and all that stuff
+Aight this is the fun part, open "Virtual Machine Manager", and click `"New VM" > Local install media > Browse > Browse Local` and select the ISO you download for Windows 10. If it asks for search permission give it permission. Whatever it asks of you give it.
+
+Next is memory and CPUs, I gave it half of my RAM and all but 2 cores of my CPU
+
+Then give it some storage, I gave mine 500GB just to survive more than an hour with the bloatware that is in win10
 
 Under construction...
 
