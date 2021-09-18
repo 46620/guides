@@ -2,7 +2,10 @@ site_name: Guides
 site_author: "46620"
 site_description: Random Guides for all
 site_url: https://guides.46620.moe/
-theme: material
+theme:
+  name: material
+  palette:
+    scheme: slate
 nav:
     - Main: 'index.md'
     - About: 'about.md'
@@ -13,7 +16,8 @@ nav:
             - 'Tautulli': 'server/plex/tautulli.md'
             - 'Tautulli Scripting': 'server/plex/tautulli_scripting.md'
     - PC:
-        - 'Single GPU vfio': 'machine/linux/1gpu_pass.md'
+        - Linux:
+            - 'Single GPU passthrough': 'machine/linux/1gpu_pass.md'
 
 
 markdown_extensions:
