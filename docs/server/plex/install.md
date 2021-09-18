@@ -1,7 +1,7 @@
 # Plex
 
 ???+ info "Notice"
-    Make sure to read the [About](../../about.md#requirements) page before following this.
+    Make sure to read the [requirements](../../requirements.md) page before following this.
 
 ## Installation
 
