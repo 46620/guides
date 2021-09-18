@@ -37,4 +37,4 @@ docker start Plex
 After you wait for Plex to restart, you want to edit your library to use the custom agents, below is a gif on how to do so.
 
 ??? tip "Changing the agent"
-    ![change_agent](img/change_agent.gif)
+    ![01_change_agent](img/01_change_agent.gif)

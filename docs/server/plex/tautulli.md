@@ -17,7 +17,7 @@ First thing you're gonna wanna do is go to settings and click "Show Advanced". T
 
 If you wanna use a script that runs when someone finishes an episode, but you know that people skip the last 3 minutes of an episode cause the saw a single credit popup, then you might wanna lower the number. I personally use 80 as it seems to catch 99.99% of streams.
 
-![tautulli_history_log.png](img/tautulli_history_log.png)
+![02_tautulli_history_log.png](img/02_tautulli_history_log.png)
 
 ### Image Hosting
 

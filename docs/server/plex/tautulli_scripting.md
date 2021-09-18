@@ -30,13 +30,13 @@ In Tautulli go to `Settings > Notification Agents > Add a new notification agent
 
 First you want to set the script folder and the script to use, below is a screenshot that shows my setup, adapt the paths for yours.
 
-![tautulli_pas_1](img/tautulli_pas_1.png)
+![03_tautulli_pas_1](img/03_tautulli_pas_1.png)
 
 Next go to triggers and check "Playback Stop" and optionally "Watched" if you want to guarantee that the script runs.
 
 Next go to Conditions and set it up similar to the photo below. Make sure the Library Name is where you have your Anime.
 
-![tautulli_pas_2](img/tautulli_pas_2.png)
+![04_tautulli_pas_2](img/04_tautulli_pas_2.png)
 
 Lastly go to the Arguments tab and in "Playback Stop" and "Watched" put in `<config.ini> "{show_name}"`
 
