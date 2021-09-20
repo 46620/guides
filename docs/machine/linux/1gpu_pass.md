@@ -1,9 +1,7 @@
 # Single GPU passthrough
-> Last updated: 2021-09-19 8:10pm EDT
+> Last updated: 2021-09-19 9:05pm EDT
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
-
-# **THIS GUIDE IS NOT FINISHED YET**
 
 # Notices
 
@@ -118,8 +116,7 @@ In your VM details go to "Boot Options" and disable the CDROM options.
 
 Next remove both CDROMS (you can delete the files if you want)
 
-#### Optional Removal (untseted as of writing)
-You can also remove `Channel Spice, Display Spice, Video QXL, Sound ich*` if you want. I have not tested this but one of the guides suggests doing this
+You can also remove `Sound ich*` if you want. I have not noticed anything buggy yet with it removed.
 
 # QEMU hooks
 You ready to learn the wonders of qemu hooks? Cause if not you don't have a choice.
@@ -300,9 +297,78 @@ To start this step go ahead and attach all of your GPU stuff to your VM by click
 
 After you do it to one of them.. Do it to the rest of them. That's right folks you need to do it to all of them.
 
-After you do that 
+After you do this go to the option that says `Video QXL`, click it and replace "QXL" with "none".
 
-Under construction...
+After you do that start the VM and watch as your screens go black and you boot to Windows 10. 
+
+# Making the VM stealthy
+> This entire section is based on the videos [here](https://www.youtube.com/watch?v=rrlpg6F82S4) and [here](https://www.youtube.com/watch?v=VKh2eKPnmXs) I highly recommend watching those instead of following this part so you can make sure you do everything right for your system
+
+You wanna play BattlEye games? Well follow the steps below until it gets officially supported on [Proton](https://fossbytes.com/steam-deck-valve-working-on-anti-cheat-support-for-proton/)
+
+This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in this repo if you wanna base it off of that, but below is all I needed to add to get mine working.
+
+## CPU
+
+First things first, make sure that you set your CPU to be to pass the model to the VM so it doesn't show up as the wrong CPU type.
+
+![02_cpu](img/1gpu_pass/02_cpu.png)
+
+## XML
+
+After you set that up click on "Overview" and go to XML. Make sure you have XML editing on because we need to do some manual edits in here.
+
+First we need to edit HyperV, edit your HyperV section to look similar to this, if you need extra for your system to work, add it also
+
+```xml
+    <hyperv>
+      <relaxed state="on"/>
+      <vapic state="on"/>
+      <spinlocks state="on" retries="8191"/>
+      <vpindex state="on"/>
+      <runtime state="on"/>
+      <synic state="on"/>
+      <stimer state="on"/>
+      <reset state="on"/>
+      <frequencies state="on"/>
+    </hyperv>
+``` 
+
+Right below that add this section for KVM
+
+```xml
+    <kvm>
+      <hidden state="on"/>
+    </kvm>
+```
+
+And below `<vmport state="off"/>` add `<ioapic driver="kvm"/>`
+
+In CPU we need to disable hypervisor and set cache mode to passthrough, so add these lines to the bottom of your CPU section
+
+```xml
+    <cache mode="passthrough"/>
+    <feature policy="disable" name="hypervisor"/>
+```
+
+And finally we need to set the clock area.
+
+```xml
+  <clock offset="localtime">
+    <timer name="pit" tickpolicy="delay"/>
+    <timer name="rtc" tickpolicy="catchup"/>
+    <timer name="hpet" present="no"/>
+    <timer name="tsc" mode="native"/>
+    <timer name="hypervclock" present="yes"/>
+  </clock>
+```
+
+Once all of that is set you should be good to start your VM. Check Task Manager to see if it's detecting it's in a VM and if it's not, then congrats, you now have a stealthy VM, but we're not done yet, just one more thing to do
+
+Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done.
+
+# Ending comments
+This guide might not be the best or work for everyone, please see the credits below. I hope that this at least makes some sense to someone and they're able to use this to help them set up a "perfect" gaming VM.
 
 !!! tldr "Credits"
     [Arch Wiki](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF)
