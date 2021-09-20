@@ -1,5 +1,5 @@
 # Single GPU passthrough
-> Last updated: 2021-09-18 6:00pm EDT
+> Last updated: 2021-09-19 8:10pm EDT
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -62,7 +62,7 @@ for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
     done;
 done;
 ```
-If the groups are not valid, you will need to do [ACS patching](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)) Which is out of the scope of this project, follow the guide linked.
+If the groups are not valid, you will need to do [ACS patching](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)), which is out of the scope of this project, follow the guide linked.
 
 While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find.
 
@@ -121,13 +121,164 @@ Next remove both CDROMS (you can delete the files if you want)
 #### Optional Removal (untseted as of writing)
 You can also remove `Channel Spice, Display Spice, Video QXL, Sound ich*` if you want. I have not tested this but one of the guides suggests doing this
 
-# Hijacking a GPU
-This part sucks the most IMHO.
-
-## QEMU hooks
+# QEMU hooks
 You ready to learn the wonders of qemu hooks? Cause if not you don't have a choice.
 
-Under construction...
+## Installing
+To get started you need to make a few folders for the hooks so run `sudo mkdir -p /etc/libvirt/hooks` to make said folders.
+
+Next thing you want to do is download the hook manager itself by running the following commands:
+
+``` bash
+sudo wget 'https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/master/libvirt_hooks/qemu' \
+     -O /etc/libvirt/hooks/qemu
+sudo chmod +x /etc/libvirt/hooks/qemu
+sudo systemctl restart libvirtd
+```
+And there ya go, you've now installed the manager for the hooks.. time to write them
+
+## Making your own hooks
+This section is annoying but honestly kinda my favorite. We now have to write the scripts that will tell our computer to give the virtual machine the graphics card. 
+
+I hope you know what your VM is called cause now would be the time to know the name
+
+To get started you want to make the folder structure below: 
+```
+/etc/libvirt/hooks
+├── qemu
+└── qemu.d
+    └── <vm_name>
+        ├── prepare
+        │   └── begin
+        ├── release
+        │   └── end
+        └── stopped
+            └── end
+```
+> The stopped folder is not required, but on my setup I need it because my release scripts never run.
+
+With your folders created now we need to make some scripts. You need to put the scripts in the proper begin/end folder for their jobs. Below are some examples with the path of them as the name. You can use these examples but you need to remember to change certain things for your builds, like your dm, vtcons, and drivers.
+
+??? info "/etc/libvirt/hooks/qemu.d/<vm_name\>/prepare/begin/start.sh"
+    ``` bash
+    # File based on "SomeOrdinaryGamers" scripts.
+    # Anything labeled with a * in the comment needs to be edited by you to work with your setup
+
+    # debugging
+    set -x
+
+    # load vars
+    source "/etc/libvirt/hooks/kvm.conf"
+
+    # kill the DM*
+    systemctl stop sddm.service
+
+    # Unbind VTconsoles*
+    echo 0 > /sys/class/vtconsole/vtcon0/bind
+    echo 0 > /sys/class/vtconsole/vtcon1/bind
+
+    # Unbind EFI-framebuffer
+    echo efi-framebuffer.0 > /sys/bus/platform/drivers/efi-framebuffer/unbind
+
+    # Avoid race condition*
+    sleep 5
+
+    # Unload Nvidia Drivers*
+    modprobe -r nvidia_uvm
+    modprobe -r i2c_nvidia_gpu
+    modprobe -r nvidia_drm
+    modprobe -r nvidia_modeset
+    modprobe -r drm_kms_helper
+    modprobe -r nvidia
+    modprobe -r drm
+
+    # Unbind GPU*
+    virsh nodedev-detach $VIRSH_GPU_VIDEO
+    virsh nodedev-detach $VIRSH_GPU_AUDIO
+    virsh nodedev-detach $VIRSH_GPU_USB
+    virsh nodedev-detach $VIRSH_GPU_SERIAL
+
+    # Isolate the CPU
+    systemctl set-property --runtime -- user.slice AllowedCPUs=0,6
+    systemctl set-property --runtime -- system.slice AllowedCPUs=0,6
+    systemctl set-property --runtime -- init.scope AllowedCPUs=0,6
+
+
+    # load vfio
+    modprobe vfio
+    modprobe vfio_pci
+    modprobe vfio_iommu_type1
+    ```
+
+??? info "/etc/libvirt/hooks/qemu.d/<vm_name\>/release/end/revert.sh"
+    ``` bash
+    # File based on "SomeOrdinaryGamers" scripts.
+    # Anything labeled with a * in the comment needs to be edited by you to work with your setup
+    
+    # debugging
+    set -x
+    
+    # Restart linux host entirely (debug line)
+    # reboot
+    
+    # load vars
+    source "/etc/libvirt/hooks/kvm.conf"
+    
+    # Unload vfio
+    modprobe -r vfio
+    modprobe -r vfio_pci
+    modprobe -r vfio_iommu_type1
+    
+    # Unisolate the CPU
+    systemctl set-property --runtime -- user.slice AllowedCPUs=0-11
+    systemctl set-property --runtime -- system.slice AllowedCPUs=0-11
+    systemctl set-property --runtime -- init.scope AllowedCPUs=0-11
+    
+    # Rebind GPU*
+    virsh nodedev-reattach $VIRSH_GPU_VIDEO
+    virsh nodedev-reattach $VIRSH_GPU_AUDIO
+    virsh nodedev-reattach $VIRSH_GPU_USB
+    virsh nodedev-reattach $VIRSH_GPU_SERIAL
+    
+    # Rebind VTconsoles*
+    echo 1 > /sys/class/vtconsole/vtcon0/bind
+    echo 1 > /sys/class/vtconsole/vtcon1/bind
+    
+    # Read Nvidia x config* (remove if on AMD)
+    nvidia-xconfig --query-gpu-info > /dev/null 2>&1
+    
+    # Rebind EFI-framebuffer
+    echo "efi-framebuffer.0" > /sys/bus/platform/drivers/efi-framebuffer/bind
+    
+    # Reload Nvidia Drivers*
+    modprobe nvidia_uvm
+    modprobe i2c_nvidia_gpu # Key was rejected by service
+    modprobe nvidia_drm # Key was rejected by service
+    modprobe nvidia_modeset
+    modprobe drm_kms_helper # Key was rejected by service
+    modprobe nvidia
+    modprobe drm
+
+    # Start the DM*
+    systemctl start sddm.service
+    ```
+But wait... what's this elusive `kvm.conf` file I see? Well lemme tell you, it's a small dictonary of which PCI devices are what device, lemme show you:
+
+??? info "/etc/libvirt/hooks/kvm.conf"
+    ```
+    VIRSH_GPU_VIDEO=pci_0000_05_00_0
+    VIRSH_GPU_AUDIO=pci_0000_05_00_1
+    VIRSH_GPU_USB=pci_0000_05_00_2
+    VIRSH_GPU_SERIAL=pci_0000_05_00_3
+    ```
+That's right, the file's sole purpose is to be a dictionary for your PCI devices you got in [this step](1gpu_pass.md#enable-verify-iommu).
+
+Make sure that all the scripts are runable by doing `sudo chmod +x /path/to/each/script.sh` to all of the scripts.
+
+Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right.. now go hold the power button down to restart it so you can continue.
+
+# Hijacking a GPU
+This part sucks the most IMHO.
 
 ## Patching the GPU
 >This step is not required for all GPUs. It's needed for mine so I will go over that. Look up if you need to do it.
@@ -148,6 +299,8 @@ To start this step go ahead and attach all of your GPU stuff to your VM by click
 ![01_gpu_vbios](img/1gpu_pass/01_gpu_vbios.png)
 
 After you do it to one of them.. Do it to the rest of them. That's right folks you need to do it to all of them.
+
+After you do that 
 
 Under construction...
 
