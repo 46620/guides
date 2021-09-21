@@ -20,9 +20,9 @@ Installation is very easy, clone the repo somewhere and yell at tautulli to look
 Fun thing: if you do this for multiple users, no config will ever be the same. Follow their [config guide](https://github.com/RickDB/PlexAniSync#step-3---configuration) to set up the configs. If you name your config file differently, you can call it by doing `python PlexAniSync.py <config.ini>`.
 
 ### Custom mapping
-This shit fucking sucks. Lets say, hypohetically, for the sake of the argument, that you have have a large media library right? Now let's say that you combine shows into series with multiple seasons, that would be normal, no? Now let's say hypothetically if the script failed to detect that?
+Say you got a large media library and you did the smart thing of merging different seasons into one show to be able to find everything under one name. Now you got the new shit to deal with.. Custom Mapping.
 
-Aight out of the Ben Shapiro rant, this is something the script does do and it annoyed me. Luckily they have a solution with the `custom_mappings.yaml` file. This is a file that you manually have to write up yourself, but I have one [here](https://github.com/46620/custom-mappings) that has everything that I've ever had on my media server. I try to update it when I add stuff. If you want to add something, please send a PR to the repo as it would help out a lot. Just place the file in the root of the folder and it should be picked up everytime the scripts run.
+That's right, the script *at least it used to idk how good it is now* failed when things were merged into series and not separate series. The solution? `custom_mappings.yaml`. With this file you can make everything detected how you want it. I have an example [here](https://github.com/46620/custom-mappings) with my current library, and a cron file if you want to use it. I'd recommend setting up the cronjob if you do use it as I try to update that file as often as I can with how I have shows set up.
 
 ### Setting up in Tautulli
 
