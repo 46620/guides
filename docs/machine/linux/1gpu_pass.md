@@ -36,7 +36,7 @@ sudo usermod -aG kvm,input,libvirt <your_name>
 # Enable & Verify IOMMU
 Before you start setting up VMs, go to your BIOS and enable either Intel VT-d or AMD-Vi + IOMMU depending on your processor and motherboard. If you're using AMD and you do not see the IOMMU option, you should be fine, but do research.
 
-After enabling that in your BIOS you're now gonna have to edit grub and add either one of the following depending on your processor.
+After enabling that in your BIOS you're now gonna have to edit grub and add either one of the following depending on your processor:
 
 | /etc/default/grub |
 | ----- |
@@ -48,7 +48,7 @@ After you do that run `grub-mkconfig -o /boot/grub/grub.cfg` to rebuild your con
 
 To verify the groups run `dmesg | grep 'IOMMU enabled'`. If it does not show up then you missed something or your system does not support it. (There are instances where IOMMU will not report as enabled but still work, verify with the second part before thinking something is funky).
 
-After making sure that IOMMU grouping is enabled, run the following script to make sure that the groups are valid, make sure that the GPU is in it's own group with all of it's stuff.
+After making sure that IOMMU grouping is enabled, run the following script to make sure that the groups are valid, make sure that the GPU is in it's own group with all of it's stuff:
 
 ``` bash
 #!/bin/bash
@@ -103,7 +103,7 @@ Last add another CDROM for the virtio iso.
 After that you can hit Begin Installation.
 
 ### The First boot/Install
-Once you hit begin installation, wait til it asks you to press any button to boot from CD. Press something and go through the setup until you're asked how you want to do the install
+Once you hit begin installation, wait til it asks you to press any button to boot from CD. Press something and go through the setup until you're asked how you want to do the install.
 
 Select Custom and select your... oh wait there's no disk. Hit "Load driver" and install the win10 driver. Then select your disk and do your standard windows 10 install.
 
@@ -114,7 +114,7 @@ This is a small section to just make management later a bit easier.
 
 In your VM details go to "Boot Options" and disable the CDROM options.
 
-Next remove both CDROMS (you can delete the files if you want)
+Next remove both CDROMS (you can delete the files if you want).
 
 You can also remove `Sound ich*` if you want. I have not noticed anything buggy yet with it removed.
 
@@ -132,12 +132,12 @@ sudo wget 'https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/master/l
 sudo chmod +x /etc/libvirt/hooks/qemu
 sudo systemctl restart libvirtd
 ```
-And there ya go, you've now installed the manager for the hooks.. time to write them
+And there ya go, you've now installed the manager for the hooks.. time to write them.
 
 ## Making your own hooks
 This section is annoying but honestly kinda my favorite. We now have to write the scripts that will tell our computer to give the virtual machine the graphics card. 
 
-I hope you know what your VM is called cause now would be the time to know the name
+I hope you know what your VM is called cause now would be the time to know the name.
 
 To get started you want to make the folder structure below: 
 ```
@@ -284,7 +284,7 @@ First thing you're gonna wanna do is get the file you dumped in [this step](1gpu
 
 Next you want to install a hex editor, for this guide I'm using Bless so run `sudo pacman -S bless` and open it.
 
-Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup open the original and get ready for patching
+Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup open the original and get ready for patching.
 
 Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** infront of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
 

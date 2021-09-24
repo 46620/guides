@@ -1,6 +1,6 @@
 # Plex
 
-???+ info "Notice"
+!!! info "Notice"
     Make sure to read the [requirements](../../requirements.md) page before following this.
 
 ## Installation
