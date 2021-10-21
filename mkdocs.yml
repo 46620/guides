@@ -18,6 +18,8 @@ nav:
     - PC:
         - Linux:
             - 'Single GPU passthrough': 'machine/linux/1gpu_pass.md'
+        - Other:
+            - 'Torrenting': 'machine/other/torrenting.md'
 
 
 markdown_extensions:
