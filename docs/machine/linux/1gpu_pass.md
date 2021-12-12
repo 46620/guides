@@ -40,11 +40,11 @@ After enabling that in your BIOS you're now gonna have to edit grub and add eith
 
 | /etc/default/grub |
 | ----- |
-| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt ..."` |
+| `GRUB_CMDLINE_LINUX_DEFAULT="... intel_iommu=on iommu=pt video=efifb:off ..."` |
 | OR |
-| `GRUB_CMDLINE_LINUX_DEFAULT="... amd_iommu=on iommu=pt ..."` |
+| `GRUB_CMDLINE_LINUX_DEFAULT="... amd_iommu=on iommu=pt video=efifb:off..."` |
 
-After you do that run `grub-mkconfig -o /boot/grub/grub.cfg` to rebuild your config with iommu grouping enabled, and then reboot.
+After you do that run `grub-mkconfig -o /boot/grub/grub.cfg` to update your config with iommu grouping enabled, and then reboot.
 
 To verify the groups run `dmesg | grep 'IOMMU enabled'`. If it does not show up then you missed something or your system does not support it. (There are instances where IOMMU will not report as enabled but still work, verify with the second part before thinking something is funky).
 
@@ -185,9 +185,7 @@ With your folders created now we need to make some scripts. You need to put the 
     modprobe -r i2c_nvidia_gpu
     modprobe -r nvidia_drm
     modprobe -r nvidia_modeset
-    modprobe -r drm_kms_helper
     modprobe -r nvidia
-    modprobe -r drm
 
     # Unbind GPU*
     virsh nodedev-detach $VIRSH_GPU_VIDEO
@@ -199,7 +197,6 @@ With your folders created now we need to make some scripts. You need to put the 
     systemctl set-property --runtime -- user.slice AllowedCPUs=0,6
     systemctl set-property --runtime -- system.slice AllowedCPUs=0,6
     systemctl set-property --runtime -- init.scope AllowedCPUs=0,6
-
 
     # load vfio
     modprobe vfio
@@ -252,9 +249,7 @@ With your folders created now we need to make some scripts. You need to put the 
     modprobe i2c_nvidia_gpu # Key was rejected by service
     modprobe nvidia_drm # Key was rejected by service
     modprobe nvidia_modeset
-    modprobe drm_kms_helper # Key was rejected by service
     modprobe nvidia
-    modprobe drm
 
     # Start the DM*
     systemctl start sddm.service
@@ -275,10 +270,9 @@ Make sure that all the scripts are runable by doing `sudo chmod +x /path/to/each
 Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right.. now go hold the power button down to restart it so you can continue.
 
 # Hijacking a GPU
-This part sucks the most IMHO.
 
 ## Patching the GPU
->This step is not required for all GPUs. It's needed for mine so I will go over that. Look up if you need to do it.
+>This step is not required for all GPUs. I'm covering it for NVIDIA cards just to make it easier if you actually need it.
 
 First thing you're gonna wanna do is get the file you dumped in [this step](1gpu_pass.md#before-installing-linux) and put it somewhere you will remember. I put mine in a `vbios` folder in my `Documents` directory.
 
@@ -291,7 +285,7 @@ Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the
 ## Attaching the GPU to the VM
 This is my least favorite part as it just takes time and is annoying as shit to do.
 
-To start this step go ahead and attach all of your GPU stuff to your VM by clicking `Add Hardware > PCI Host Device` and adding everything for the GPU.. one at a time. After you do that click on one of the devices and go to `XML` under `</source>` add a line similar to this for your patched vBIOS `<rom file="/home/mia/Documents/vbios/2080s.rom"/>`. It should look similar to the photo below
+To start this step go ahead and attach all of your GPU stuff to your VM by clicking `Add Hardware > PCI Host Device` and adding everything for the GPU.. one at a time. After you do that click on one of the devices and go to `XML` under `</source>` add a line similar to this for your patched vBIOS `<rom file="/path/to/vbios/file.rom"/>`. It should look similar to the photo below
 
 ![01_gpu_vbios](img/1gpu_pass/01_gpu_vbios.png)
 
