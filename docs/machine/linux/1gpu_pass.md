@@ -1,5 +1,5 @@
 # Single GPU passthrough
-> Last updated: 2021-09-19 9:05pm EDT
+> Last updated: 2021-12-22
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -26,7 +26,7 @@ Now that we got that out of the way, lets get to installing, crying, and a lot o
 Single GPU passthrough will need some stuff installed in order to work. Running the following list of commands will install everything for you.
 
 ```bash
-sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq
+sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers dkms <your_grapics_drivers>-dkms
 sudo systemctl enable --now libvirtd.service
 sudo virsh net-autostart default
 sudo virsh net-start default
