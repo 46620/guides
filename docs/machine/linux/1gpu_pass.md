@@ -1,5 +1,5 @@
 # Single GPU passthrough
-> Last updated: 2021-12-22
+> Last updated: 2022-01-21
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -360,6 +360,78 @@ And finally we need to set the clock area.
 Once all of that is set you should be good to start your VM. Check Task Manager to see if it's detecting it's in a VM and if it's not, then congrats, you now have a stealthy VM, but we're not done yet, just one more thing to do
 
 Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done.
+
+??? warning "Patching qemu and the kernel (not supported)"
+    Want certain things to have a harder time detecting you're on a virtual machine? Great news, I got some patches that I spent too fucking long working on.
+    
+    The guide will be split into multiple sub guides in this one drop down to keep it all together.
+
+    ??? info "Kernel Patching"
+        > The following guide is for patching your kernel and passing rdtscp checks on PAFish.
+        
+        > This guide will be going over Arch's kernel build method as seen on the [Arch Wiki](https://wiki.archlinux.org/title/Kernel/Arch_Build_System) and the patch file is for the zen kernel.
+    
+        First thing is grabbing the source code. Luckily on arch there are very easy ways to do this. Running `asp update linux-zen` will grab the latest build files and doing `asp export linux-zen`. You can replace linux with any package to grab the latest build files of said package, just in case you wanna compile everything yourself.
+        
+        After grabbing the source next you want to make a little build directory for everything, I have mine at `~/Projects/kernel/linux-zen`
+    
+        Then download [this patch](https://raw.githubusercontent.com/46620/patches/master/kvm.patch) file and put it in the folder with the `PKGBUILD` file. (Note that the patch was built for version 5.15.13-zen1, but should work on the latest version)
+
+        !!! info
+            The patch is only updated when it actually breaks. Please check when it was last modified in my [patch repo](https://github.com/46620/patches) to see how old it might be.
+    
+        Next you're going to edit the `PKGBUILD` file and add the patch into it (example below) and [disable building docs](https://wiki.archlinux.org/title/Kernel/Arch_Build_System#Avoid_creating_the_doc), after you add it run `updpkgsums` and then `makepkg -si`.
+    
+        ```
+        source=(
+          "$_srcname::git+https://github.com/zen-kernel/zen-kernel?signed#tag=$_srctag"
+          config         # the main kernel config file
+          kvm.patch # add this line
+        )
+        ```
+
+        After you reboot, edit your VM's XML and add `<feature policy="disable" name="rdtscp"/>` to the CPU block.
+
+    ??? info "QEMU Patching"
+        > The following guide will try to mask some generic QEMU names so the Virtual Machine won't detect them.
+
+        For this we actually wanna use the [qemu-git](https://aur.archlinux.org/packages/qemu-git/) AUR package as it is easier to work with.
+
+        After cloning it locally, add [this patch](https://raw.githubusercontent.com/46620/patches/master/qemu.patch) and [this patch](https://raw.githubusercontent.com/46620/patches/master/edk2.patch) to the root folder and edit the PKGBUILD to make source and prepare similar to the following.
+
+        !!! info
+            The patches are only updated when they actually break. Please check when they were last modified in my [patch repo](https://github.com/46620/patches) to see how old they might be.
+
+        ```
+        ...
+        source=(git://git.qemu.org/qemu.git
+            qemu-guest-agent.service
+            65-kvm.rules
+            qemu.patch # added
+            edk2.patch # added
+        )
+        ...
+        prepare() {
+          cd "${srcdir}/${_gitname}"
+          mkdir build-{full,headless}
+          git submodule init; git submodule update # added
+          cd .. # added
+          patch -p1 < qemu.patch # added
+          patch -p1 --binary < edk2.patch # added
+          cd "${srcdir}/${_gitname}" # added
+          mkdir -p extra-arch-{full,headless}/usr/{bin,share/qemu}
+        }
+        ```
+
+        After doing that run `updpkgsums` and then `makepkg -s`. Install the packages you need from what it builds, you can't use `makepkg -si` as qemu-headless and qemu conflict with each other.
+
+        !!! warning
+            After compiling a new version of qemu, restart libvirtd and remake your Virtual Machine, you can leave the old one there, just set the storage to the old drive and copy any XML edits you made, this is just to make sure that if the patch breaks anything, you still have your original to restore to.
+
+    !!! info "Compile faster"
+        Arch's default compile flags are kinda dog water and slow, you can edit `/etc/makepkg.conf` and uncomment the `MAKEFLAGS` line and change it to match your needs.
+        
+        Also for compiling the kernel, you should set up [modprobed-db](https://wiki.archlinux.org/title/Modprobed-db) to cut the compile time (and size) by at least half.
 
 # Ending comments
 This guide might not be the best or work for everyone, please see the credits below. I hope that this at least makes some sense to someone and they're able to use this to help them set up a "perfect" gaming VM.
