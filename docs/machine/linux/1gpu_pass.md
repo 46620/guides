@@ -1,5 +1,5 @@
 # Single GPU passthrough
-> Last updated: 2022-01-21
+> Last updated: 2022-03-06
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -34,7 +34,7 @@ sudo usermod -aG kvm,input,libvirt <your_name>
 ```
 
 # Enable & Verify IOMMU
-Before you start setting up VMs, go to your BIOS and enable either Intel VT-d or AMD-Vi + IOMMU depending on your processor and motherboard. If you're using AMD and you do not see the IOMMU option, you should be fine, but do research.
+Before you start setting up VMs, go to your BIOS and enable either Intel VT-d or AMD-Vi + IOMMU depending on your processor and motherboard.
 
 After enabling that in your BIOS you're now gonna have to edit grub and add either one of the following depending on your processor:
 
@@ -46,7 +46,7 @@ After enabling that in your BIOS you're now gonna have to edit grub and add eith
 
 After you do that run `grub-mkconfig -o /boot/grub/grub.cfg` to update your config with iommu grouping enabled, and then reboot.
 
-To verify the groups run `dmesg | grep 'IOMMU enabled'`. If it does not show up then you missed something or your system does not support it. (There are instances where IOMMU will not report as enabled but still work, verify with the second part before thinking something is funky).
+To verify the groups run `dmesg | grep 'IOMMU enabled'`. If it does not show up then you missed something or your system does not support it. (If that reports nothing, try running `journalctl -b 0 | grep -i iommu` instead).
 
 After making sure that IOMMU grouping is enabled, run the following script to make sure that the groups are valid, make sure that the GPU is in it's own group with all of it's stuff:
 
@@ -62,13 +62,13 @@ done;
 ```
 If the groups are not valid, you will need to do [ACS patching](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)), which is out of the scope of this project, follow the guide linked.
 
-While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find.
+While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find. You will need it for a later step.
 
 # Setting up the VM
 This guide is going to assume that you want to set up a Windows 10 VM, In the future I will make a guide for a MacOS VM, but now is not the time.
 
 ## Downloading Drivers
-Yes I'm telling you to download the drivers before downloading the OS, why? Cause fuck you, you're gonna forget to download them later and skip to installing. Anyways click [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso) for the latest virtio drivers.
+Yes, I'm telling you to download the drivers before downloading the OS, why? Cause fuck you, you're gonna forget to download them later and skip to installing. Anyways click [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso) for the latest virtio drivers.
 
 ## Downloading Windows 10
 Aight now you need a shit OS to install huh? [This](https://www.microsoft.com/en-us/software-download/windows10ISO) page will be where you download Windows 10.
@@ -86,11 +86,11 @@ Then give it some storage, I gave mine 500GB just to survive more than an hour w
 After giving it a reasonable amount of storage, name your vm, or keep it default. Just make sure that you note down what it's called. Also check the box that says "Customize configuration before install".
 
 ### Customizing Install
-Aight in the "Overview" section set the firmware to the UEFI setting that does not have `secboot` in the name.
+Aight in the "Overview" section set the firmware to `/usr/share/edk2-ovmf/x64/OVMF_CODE.fd`.
 
 Then go to "CPUs" and uncheck "Copy host CPU configuration" and set the model to "Host passthrough".
 
-Then open the dropdown for Topology and check the "Manually set CPU topology" option/ Then set the information there so the vCPU allocation matches what you put in the base setup.
+Then open the dropdown for Topology and check the "Manually set CPU topology" option. Then set the information there so the vCPU allocation matches what you put in the base setup.
 
 Go into "Boot Options" and check CDROM and move it to the top of the boot list (this should uhh.. really be on by default but okay).
 
@@ -103,7 +103,7 @@ Last add another CDROM for the virtio iso.
 After that you can hit Begin Installation.
 
 ### The First boot/Install
-Once you hit begin installation, wait til it asks you to press any button to boot from CD. Press something and go through the setup until you're asked how you want to do the install.
+Once you hit begin installation, and when it asks you to press any button to boot from CD, press something. Go through the setup until you're asked how you want to do the install.
 
 Select Custom and select your... oh wait there's no disk. Hit "Load driver" and install the win10 driver. Then select your disk and do your standard windows 10 install.
 
@@ -149,12 +149,18 @@ To get started you want to make the folder structure below:
         │   └── begin
         ├── release
         │   └── end
-        └── stopped
-            └── end
 ```
-> The stopped folder is not required, but on my setup I need it because my release scripts never run.
 
 With your folders created now we need to make some scripts. You need to put the scripts in the proper begin/end folder for their jobs. Below are some examples with the path of them as the name. You can use these examples but you need to remember to change certain things for your builds, like your dm, vtcons, and drivers.
+
+??? info "/etc/libvirt/hooks/kvm.conf"
+    ```
+    VIRSH_GPU_VIDEO=pci_0000_05_00_0
+    VIRSH_GPU_AUDIO=pci_0000_05_00_1
+    VIRSH_GPU_USB=pci_0000_05_00_2
+    VIRSH_GPU_SERIAL=pci_0000_05_00_3
+    ```
+You might be wondering what those numbers are in that file? It's the numbers we got from our IOMMU groupings earlier. the `pci_0000` part is required.
 
 ??? info "/etc/libvirt/hooks/qemu.d/<vm_name\>/prepare/begin/start.sh"
     ``` bash
@@ -254,25 +260,15 @@ With your folders created now we need to make some scripts. You need to put the 
     # Start the DM*
     systemctl start sddm.service
     ```
-But wait... what's this elusive `kvm.conf` file I see? Well lemme tell you, it's a small dictonary of which PCI devices are what device, lemme show you:
-
-??? info "/etc/libvirt/hooks/kvm.conf"
-    ```
-    VIRSH_GPU_VIDEO=pci_0000_05_00_0
-    VIRSH_GPU_AUDIO=pci_0000_05_00_1
-    VIRSH_GPU_USB=pci_0000_05_00_2
-    VIRSH_GPU_SERIAL=pci_0000_05_00_3
-    ```
-That's right, the file's sole purpose is to be a dictionary for your PCI devices you got in [this step](1gpu_pass.md#enable-verify-iommu).
 
 Make sure that all the scripts are runable by doing `sudo chmod +x /path/to/each/script.sh` to all of the scripts.
 
-Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right.. now go hold the power button down to restart it so you can continue.
+Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right. Now go hold the power button down to restart it so you can continue.
 
 # Hijacking a GPU
 
 ## Patching the GPU
->This step is not required for all GPUs. I'm covering it for NVIDIA cards just to make it easier if you actually need it.
+>This step is not required for all GPUs. I'm covering it for most NVIDIA cards just to make it easier if you actually need it.
 
 First thing you're gonna wanna do is get the file you dumped in [this step](1gpu_pass.md#before-installing-linux) and put it somewhere you will remember. I put mine in a `vbios` folder in my `Documents` directory.
 
@@ -281,6 +277,10 @@ Next you want to install a hex editor, for this guide I'm using Bless so run `su
 Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup open the original and get ready for patching.
 
 Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** infront of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
+
+??? info "guide for patching"
+    ![03_gpu_patch](img/1gpu_pass/03_gpu_patch.png)
+    ![04_gpu_patch](img/1gpu_pass/04_gpu_patch.png)
 
 ## Attaching the GPU to the VM
 This is my least favorite part as it just takes time and is annoying as shit to do.
@@ -297,8 +297,6 @@ After you do that start the VM and watch as your screens go black and you boot t
 
 # Making the VM stealthy
 > This entire section is based on the videos [here](https://www.youtube.com/watch?v=rrlpg6F82S4) and [here](https://www.youtube.com/watch?v=VKh2eKPnmXs) I highly recommend watching those instead of following this part so you can make sure you do everything right for your system
-
-You wanna play BattlEye games? Well follow the steps below until it gets officially supported on [Proton](https://fossbytes.com/steam-deck-valve-working-on-anti-cheat-support-for-proton/)
 
 This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in this repo if you wanna base it off of that, but below is all I needed to add to get mine working.
 
@@ -357,9 +355,7 @@ And finally we need to set the clock area.
   </clock>
 ```
 
-Once all of that is set you should be good to start your VM. Check Task Manager to see if it's detecting it's in a VM and if it's not, then congrats, you now have a stealthy VM, but we're not done yet, just one more thing to do
-
-Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done.
+Once all of that is set you should be good to start your VM. Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done. You can use [this](apps/pafish.exe) tool to check how stealthy the Virtual Machine is.
 
 ??? warning "Patching qemu and the kernel (not supported)"
     Want certain things to have a harder time detecting you're on a virtual machine? Great news, I got some patches that I spent too fucking long working on.
