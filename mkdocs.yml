@@ -15,6 +15,8 @@ nav:
             - 'Anime Metadata': 'server/plex/metadata_anime.md'
             - 'Tautulli': 'server/plex/tautulli.md'
             - 'Tautulli Scripting': 'server/plex/tautulli_scripting.md'
+        - Games:
+            - 'Project Zomboid': 'server/games/zomboid.md'
     - PC:
         - Linux:
             - 'Single GPU passthrough': 'machine/linux/1gpu_pass.md'
