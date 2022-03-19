@@ -1,5 +1,5 @@
 # Single GPU passthrough
-> Last updated: 2022-03-06
+> Last updated: 2022-03-19
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -276,7 +276,7 @@ Next you want to install a hex editor, for this guide I'm using Bless so run `su
 
 Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup open the original and get ready for patching.
 
-Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** infront of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
+Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** before of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
 
 ??? info "guide for patching"
     ![03_gpu_patch](img/1gpu_pass/03_gpu_patch.png)
