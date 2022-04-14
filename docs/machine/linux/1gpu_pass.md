@@ -1,39 +1,68 @@
 # Single GPU passthrough
-> Last updated: 2022-03-19
+> Last updated: 2022-04-14
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
-# Notices
+## Notices
 
 !!! warning
     This guide is less of a full "here's how everything works" and more of a jumpstart into this. **PLEASE DO RESEARCH AND DO NOT RELY ON THIS ALONE** All pages I use will be at the bottom in the credits. 
 
 !!! info "Current setup"
-    The following are what this guide is based on, please make sure to change certain steps for your build. Read the credits for help.
+    The following guide is largely based on these dependencies, please make sure to change certain steps for your build. Read the credits for help.
 
-    *    A machine running an arch based distro
-    *    An EVGA RTX 2080 Super Black
-    *    An AMD Ryzen 5 5600x
+    *    Any Linux Distro
+    *    An Nvidia GPU
+    *    An AMD CPU
 
     At some points I will provide the intel commands, but please make sure to read the credits for all the guides that go more in-depth.
 
 !!! warning "Before Installing Linux"
-    Aight before you even get to Linux (If you're still on Windows) dump your GPUs vBIOS using [GPUz](https://www.techpowerup.com/gpuz/). You're gonna need it in a much later step. Just back it up and keep it somewhere you can get to later.
+    If you are still on Windows while reading this, dump your GPUs vBIOS using [GPUz](https://www.techpowerup.com/gpuz/). You're gonna need it in a much later step. Just back it up and keep it somewhere you can get to later.
 
 Now that we got that out of the way, lets get to installing, crying, and a lot of screaming.
 
-# Dependencies
+## Dependencies
 Single GPU passthrough will need some stuff installed in order to work. Running the following list of commands will install everything for you.
+> I've only fully tested on Arch and just swapped what packages needed to be installed for each distro, if there's an issue with one, please let me know.
 
-```bash
-sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers dkms <your_grapics_drivers>-dkms
-sudo systemctl enable --now libvirtd.service
-sudo virsh net-autostart default
-sudo virsh net-start default
-sudo usermod -aG kvm,input,libvirt <your_name>
-```
+??? info "Arch based distros"
+    ```bash
+    sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers dkms nvidia-dkms
+    sudo systemctl enable --now libvirtd.service
+    sudo virsh net-autostart default
+    sudo virsh net-start default
+    sudo usermod -aG kvm,input,libvirt <your_name>
+    ```
 
-# Enable & Verify IOMMU
+??? info "Ubuntu"
+    ```bash
+    sudo apt install qemu-kvm libvirt-daemon-system dnsmasq linux-headers-`uname -r` dkms nvidia-dkms-510 # Please make sure to update this number with the latest nvidia driver
+    sudo systemctl enable --now libvirtd.service
+    sudo virsh net-autostart default
+    sudo virsh net-start default
+    sudo usermod -aG kvm,input,libvirt <your_name>
+    ```
+
+??? info "Debain"
+    ```bash
+    sudo apt install qemu-kvm libvirt-daemon-system iptables dnsmasq linux-headers-`uname -r` dkms nvidia-driver
+    sudo systemctl enable --now libvirtd.service
+    sudo virsh net-autostart default
+    sudo virsh net-start default
+    sudo usermod -aG kvm,input,libvirt <your_name>
+    ```
+
+??? info "Fedora"
+    ```bash
+    sudo dnf install qemu libvirt edk2-ovmf virt-manager akmod-nvidia
+    sudo systemctl enable --now libvirtd.service
+    sudo virsh net-autostart default
+    sudo virsh net-start default
+    sudo usermod -aG kvm,input,libvirt <your_name>
+    ```
+
+## Enable & Verify IOMMU
 Before you start setting up VMs, go to your BIOS and enable either Intel VT-d or AMD-Vi + IOMMU depending on your processor and motherboard.
 
 After enabling that in your BIOS you're now gonna have to edit grub and add either one of the following depending on your processor:
@@ -64,19 +93,17 @@ If the groups are not valid, you will need to do [ACS patching](https://wiki.arc
 
 While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find. You will need it for a later step.
 
-# Setting up the VM
+## Setting up the VM
 This guide is going to assume that you want to set up a Windows 10 VM, In the future I will make a guide for a MacOS VM, but now is not the time.
 
-## Downloading Drivers
-Yes, I'm telling you to download the drivers before downloading the OS, why? Cause fuck you, you're gonna forget to download them later and skip to installing. Anyways click [here](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso) for the latest virtio drivers.
+### Downloads
 
-## Downloading Windows 10
-Aight now you need a shit OS to install huh? [This](https://www.microsoft.com/en-us/software-download/windows10ISO) page will be where you download Windows 10.
+You're gonna need 2 things, A copy of [Windows](https://www.microsoft.com/en-us/software-download/windows10ISO) and the [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso) drivers. Clicking them will either download or bring you to a download page.
 
-## Setting up virt manager and all that stuff
+### Setting up virt manager and all that stuff
 This is recommended to do before all of this is to enable XML editing in virt managers settings. Open "Virtual Machine Manager" and click "Edit". Enable XML editing and hit close.
 
-### Base setup
+#### Setting up the Virtual Machine
 Aight this is the fun part, click `"New VM" > Local install media > Browse > Browse Local` and select the ISO you download for Windows 10. If it asks for search permission give it permission. Whatever it asks of you give it.
 
 Next is memory and CPUs, I gave it half of my RAM and all but 2 cores of my CPU.
@@ -85,8 +112,7 @@ Then give it some storage, I gave mine 500GB just to survive more than an hour w
 
 After giving it a reasonable amount of storage, name your vm, or keep it default. Just make sure that you note down what it's called. Also check the box that says "Customize configuration before install".
 
-### Customizing Install
-Aight in the "Overview" section set the firmware to `/usr/share/edk2-ovmf/x64/OVMF_CODE.fd`.
+In the "Overview" section set the firmware to `/usr/share/edk2-ovmf/x64/OVMF_CODE.fd`.
 
 Then go to "CPUs" and uncheck "Copy host CPU configuration" and set the model to "Host passthrough".
 
@@ -102,14 +128,14 @@ Last add another CDROM for the virtio iso.
 
 After that you can hit Begin Installation.
 
-### The First boot/Install
+#### The First boot/Install
 Once you hit begin installation, and when it asks you to press any button to boot from CD, press something. Go through the setup until you're asked how you want to do the install.
 
 Select Custom and select your... oh wait there's no disk. Hit "Load driver" and install the win10 driver. Then select your disk and do your standard windows 10 install.
 
 Once you're at the desktop, open file explorer and install the drivers from the virtio CD. Once that is complete you can shut down the VM.
 
-### Cleaning up the VM details
+#### Cleaning up the VM details
 This is a small section to just make management later a bit easier.
 
 In your VM details go to "Boot Options" and disable the CDROM options.
@@ -118,10 +144,10 @@ Next remove both CDROMS (you can delete the files if you want).
 
 You can also remove `Sound ich*` if you want. I have not noticed anything buggy yet with it removed.
 
-# QEMU hooks
-You ready to learn the wonders of qemu hooks? Cause if not you don't have a choice.
+## QEMU hooks
+You ready to learn the wonders of qemu hooks? Cause if not you really don't have a choice.
 
-## Installing
+### Installing
 To get started you need to make a few folders for the hooks so run `sudo mkdir -p /etc/libvirt/hooks` to make said folders.
 
 Next thing you want to do is download the hook manager itself by running the following commands:
@@ -134,7 +160,7 @@ sudo systemctl restart libvirtd
 ```
 And there ya go, you've now installed the manager for the hooks.. time to write them.
 
-## Making your own hooks
+### Making your own hooks
 This section is annoying but honestly kinda my favorite. We now have to write the scripts that will tell our computer to give the virtual machine the graphics card. 
 
 I hope you know what your VM is called cause now would be the time to know the name.
@@ -265,16 +291,16 @@ Make sure that all the scripts are runable by doing `sudo chmod +x /path/to/each
 
 Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right. Now go hold the power button down to restart it so you can continue.
 
-# Hijacking a GPU
+## Hijacking a GPU
 
-## Patching the GPU
+### Patching the GPU
 >This step is not required for all GPUs. I'm covering it for most NVIDIA cards just to make it easier if you actually need it.
 
 First thing you're gonna wanna do is get the file you dumped in [this step](1gpu_pass.md#before-installing-linux) and put it somewhere you will remember. I put mine in a `vbios` folder in my `Documents` directory.
 
-Next you want to install a hex editor, for this guide I'm using Bless so run `sudo pacman -S bless` and open it.
+Next you want to install a hex editor, for this guide I'm using Bless so install and open it.
 
-Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup open the original and get ready for patching.
+Next make sure that you have a backup of the file before opening it in the hex editor. After you make a backup, open the original and get ready for patching.
 
 Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** before of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
 
@@ -282,7 +308,7 @@ Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the
     ![03_gpu_patch](img/1gpu_pass/03_gpu_patch.png)
     ![04_gpu_patch](img/1gpu_pass/04_gpu_patch.png)
 
-## Attaching the GPU to the VM
+### Attaching the GPU to the VM
 This is my least favorite part as it just takes time and is annoying as shit to do.
 
 To start this step go ahead and attach all of your GPU stuff to your VM by clicking `Add Hardware > PCI Host Device` and adding everything for the GPU.. one at a time. After you do that click on one of the devices and go to `XML` under `</source>` add a line similar to this for your patched vBIOS `<rom file="/path/to/vbios/file.rom"/>`. It should look similar to the photo below
@@ -295,18 +321,16 @@ After you do this go to the option that says `Video QXL`, click it and replace "
 
 After you do that start the VM and watch as your screens go black and you boot to Windows 10. 
 
-# Making the VM stealthy
+## Hiding the VM
 > This entire section is based on the videos [here](https://www.youtube.com/watch?v=rrlpg6F82S4) and [here](https://www.youtube.com/watch?v=VKh2eKPnmXs) I highly recommend watching those instead of following this part so you can make sure you do everything right for your system
 
-This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in this repo if you wanna base it off of that, but below is all I needed to add to get mine working.
+### QEMU configs
 
-## CPU
+This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in [this](https://github.com/46620/kvm-passthrough) repo if you wanna base it off of that, but below is all I needed to add to get mine working.
 
 First things first, make sure that you set your CPU to be to pass the model to the VM so it doesn't show up as the wrong CPU type.
 
 ![02_cpu](img/1gpu_pass/02_cpu.png)
-
-## XML
 
 After you set that up click on "Overview" and go to XML. Make sure you have XML editing on because we need to do some manual edits in here.
 
@@ -357,9 +381,12 @@ And finally we need to set the clock area.
 
 Once all of that is set you should be good to start your VM. Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done. You can use [this](apps/pafish.exe) tool to check how stealthy the Virtual Machine is.
 
-??? warning "Patching qemu and the kernel (not supported)"
-    Want certain things to have a harder time detecting you're on a virtual machine? Great news, I got some patches that I spent too fucking long working on.
-    
+### Patching the kernel
+??? warning "Patching your kernel and qemu (Arch only)"
+    Wanna patch your kernel and qemu.
+
+    **USE THESE AT YOUR OWN RISK!! IF YOU GET BANNED FROM GAMES THAT DETECT THIS STUFF IT IS NOT MY FAULT**
+
     The guide will be split into multiple sub guides in this one drop down to keep it all together.
 
     ??? info "Kernel Patching"
@@ -371,7 +398,7 @@ Once all of that is set you should be good to start your VM. Open Windows Search
         
         After grabbing the source next you want to make a little build directory for everything, I have mine at `~/Projects/kernel/linux-zen`
     
-        Then download [this patch](https://raw.githubusercontent.com/46620/patches/master/kvm.patch) file and put it in the folder with the `PKGBUILD` file. (Note that the patch was built for version 5.15.13-zen1, but should work on the latest version)
+        Then download [this patch](https://raw.githubusercontent.com/46620/patches/master/kvm.patch) and put it in the folder with the `PKGBUILD` file. (Note that the patch was made for version 5.15.13-zen1, but should work on the latest version)
 
         !!! info
             The patch is only updated when it actually breaks. Please check when it was last modified in my [patch repo](https://github.com/46620/patches) to see how old it might be.
@@ -429,7 +456,7 @@ Once all of that is set you should be good to start your VM. Open Windows Search
         
         Also for compiling the kernel, you should set up [modprobed-db](https://wiki.archlinux.org/title/Modprobed-db) to cut the compile time (and size) by at least half.
 
-# Ending comments
+## Ending comments
 This guide might not be the best or work for everyone, please see the credits below. I hope that this at least makes some sense to someone and they're able to use this to help them set up a "perfect" gaming VM.
 
 !!! tldr "Credits"
