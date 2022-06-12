@@ -1,5 +1,5 @@
 # Hiding the Virtual Machines (Unsupported)
-> Last updated: 2022-05-26
+> Last updated: 2022-06-12
 
 !!! warning "NOTICE"
     Everything on this page is not officially supported or endorsed. If you get banned from a game trying to hide the fact you're on a VM, that is fully on you.
@@ -93,7 +93,7 @@ Next you're going to edit the `PKGBUILD` file and add the patch into it (example
 After you reboot, edit your VM's XML and add `<feature policy="disable" name="rdtscp"/>` to the CPU block.
 
 #### Using my repo
-This is a lot less secure as I don't sign my packages, but this is for the few that don't wanna manually recompile their kernel
+This is a lot less secure as I don't (currently) sign my packages, but this is for the few that don't wanna manually recompile their kernel
 
 edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
 
@@ -103,7 +103,7 @@ SigLevel = Optional
 Server = https://gitlab.com/46620/$repo/-/raw/master/$arch
 ```
 
-After that, reinstall `linux-zen` and `linux-zen-headers` and you should have the patch applied, then just add the XML line and everything should work.
+After that, reinstall `linux-zen-kvm` and `linux-zen-kvm-headers` and you should have the patch applied, then just add the XML line and everything should work.
 
 ### QEMU Patching
 > The following guide will try to mask some generic QEMU names so the Virtual Machine won't detect them.
