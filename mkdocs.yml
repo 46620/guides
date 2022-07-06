@@ -15,6 +15,10 @@ nav:
             - 'Anime Metadata': 'server/plex/metadata_anime.md'
             - 'Tautulli': 'server/plex/tautulli.md'
             - 'Tautulli Scripting': 'server/plex/tautulli_scripting.md'
+        - Jellyfin:
+            - 'Installation': 'server/jellyfin/install.md'
+            - 'Migrating from Plex': 'server/jellyfin/migrate.md'
+            - 'Setting up IPTV and an EPG': 'server/jellyfin/iptv.md'
         - Games:
             - 'Project Zomboid': 'server/games/zomboid.md'
     - PC:
@@ -32,3 +36,4 @@ markdown_extensions:
     - fontawesome_markdown
     - pymdownx.highlight
     - pymdownx.superfences
+    - pymdownx.tilde
