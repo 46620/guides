@@ -9,7 +9,7 @@ This is for if you already have a working windows VM. This is a very easy thing 
 
 First things first, make sure that you set your CPU to be to pass the model to the VM so it doesn't show up as the wrong CPU type.
 
-![01_cpu](../img/hide/01_cpu.png)
+![01_cpu](img/hide/01_cpu.png)
 
 After you set that up click on "Overview" and go to XML. Make sure you have XML editing on because we need to do some manual edits in here.
 
@@ -58,7 +58,7 @@ And finally we need to set the clock area.
   </clock>
 ```
 
-Once all of that is set you should be good to start your VM. Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done. You can use [this](../apps/pafish.exe) tool to check how stealthy the Virtual Machine is.
+Once all of that is set you should be good to start your VM. Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done. You can use [this](apps/pafish.exe) tool to check how stealthy the Virtual Machine is.
 
 ## Patching the Kernel and qemu (Arch only)
 **USE THESE AT YOUR OWN RISK!! IF YOU GET BANNED FROM GAMES THAT DETECT THIS STUFF IT IS NOT MY FAULT**
@@ -93,17 +93,23 @@ Next you're going to edit the `PKGBUILD` file and add the patch into it (example
 After you reboot, edit your VM's XML and add `<feature policy="disable" name="rdtscp"/>` to the CPU block.
 
 #### Using my repo
-This is a lot less secure as I don't (currently) sign my packages, but this is for the few that don't wanna manually recompile their kernel
+Don't wanna compile your own kernel? I gotchu, I made an arch repo with the zen-kernel built and ready with the patches needed.
 
-edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
+First run these 2 commands to add my key to your system
+
+```bash
+sudo pacman-key --recv-keys 71060F3E4998281A
+sudo pacman-key --lsign 12D08400A54A5B2F
+```
+
+Edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
 
 ```
 [46620-repo]
-SigLevel = Optional
 Server = https://gitlab.com/46620/$repo/-/raw/master/$arch
 ```
 
-After that, reinstall `linux-zen-kvm` and `linux-zen-kvm-headers` and you should have the patch applied, then just add the XML line and everything should work.
+After that, install `linux-zen-kvm` and `linux-zen-kvm-headers` and you should have the patch applied, then just add the XML line and everything should work.
 
 ### QEMU Patching
 > The following guide will try to mask some generic QEMU names so the Virtual Machine won't detect them.

@@ -172,15 +172,15 @@ Next make sure that you have a backup of the file before opening it in the hex e
 Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the closest "U" in front (hex 55) and delete **EVERYTHING** before of it. (The file size difference for my GPU was ~130kb). Once you do that save the file and close bless.
 
 ??? info "guide for patching"
-    ![03_gpu_patch](../img/1gpu_pass/03_gpu_patch.png)
-    ![04_gpu_patch](../img/1gpu_pass/04_gpu_patch.png)
+    ![03_gpu_patch](img/1gpu_pass/03_gpu_patch.png)
+    ![04_gpu_patch](img/1gpu_pass/04_gpu_patch.png)
 
 ### Attaching the GPU to the VM
 This is my least favorite part as it just takes time and is annoying as shit to do.
 
 To start this step go ahead and attach all of your GPU stuff to your VM by clicking `Add Hardware > PCI Host Device` and adding everything for the GPU.. one at a time. After you do that click on one of the devices and go to `XML` under `</source>` add a line similar to this for your patched vBIOS `<rom file="/path/to/vbios/file.rom"/>`. It should look similar to the photo below
 
-![01_gpu_vbios](../img/1gpu_pass/01_gpu_vbios.png)
+![01_gpu_vbios](img/1gpu_pass/01_gpu_vbios.png)
 
 After you do it to one of them.. Do it to the rest of them. That's right folks you need to do it to all of them.
 

@@ -17,7 +17,7 @@ Get the text from the IOMMU groups ready, because you're gonna need that in a mo
 
 Make a file with `sudo nano /etc/modprobe.d/vfio.conf` and put type `options vfio-pci ids=` and put the ids at the end of the device into the file, separating them with a comma (the ids have the colon in them, copy both parts of it for each). It should look similar to the following.
 
-![01_vfio_hijack](../img/2gpu_pass/01_vfio_hijack.png)
+![01_vfio_hijack](img/2gpu_pass/01_vfio_hijack.png)
 
 ### Modifying the ramdisk
 Run `sudo nano /etc/mkinitcpio.conf`
