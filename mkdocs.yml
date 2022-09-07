@@ -23,6 +23,11 @@ nav:
             - 'Project Zomboid': 'server/games/zomboid.md'
     - PC:
         - Linux:
+            - Migrating from Windows to Linux:
+                - 'Leaving Windows': 'machine/linux/migration/why.md'
+                - 'Downsides': 'machine/linux/migration/downsides.md'
+                - 'Prep': 'machine/linux/migration/prep.md'
+                - 'Post Install': 'machine/linux/migration/post.md'
             - GPU Passthrough:
                 - 'Requirements': 'machine/linux/gpu_passthrough/setup.md'
                 - 'Single GPU passthrough': 'machine/linux/gpu_passthrough/1gpu_pass.md'
@@ -36,4 +41,8 @@ markdown_extensions:
     - fontawesome_markdown
     - pymdownx.highlight
     - pymdownx.superfences
+    - pymdownx.critic
+    - pymdownx.caret
+    - pymdownx.keys
+    - pymdownx.mark
     - pymdownx.tilde
