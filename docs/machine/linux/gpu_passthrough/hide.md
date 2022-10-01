@@ -1,8 +1,8 @@
 # Hiding the Virtual Machines (Unsupported)
-> Last updated: 2022-06-12
+> Last updated: 2022-09-30
 
-!!! warning "NOTICE"
-    Everything on this page is not officially supported or endorsed. If you get banned from a game trying to hide the fact you're on a VM, that is fully on you.
+!!! error "NOTICE"
+    BattlEye and EAC will ban if you're caught with these. Don't bitch and complain if you're banned, just comlain that they made their linux compatibility opt in, not opt out.
 
 ## QEMU configs
 This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in [this](https://github.com/46620/kvm-passthrough) repo if you wanna base it off of that, but below is all I needed to add to get mine working.
@@ -25,6 +25,7 @@ First we need to edit HyperV, edit your HyperV section to look similar to this, 
       <synic state="on"/>
       <stimer state="on"/>
       <reset state="on"/>
+      <vendor_id state="on" value="buttplug"/>
       <frequencies state="on"/>
     </hyperv>
 ``` 
@@ -60,94 +61,59 @@ And finally we need to set the clock area.
 
 Once all of that is set you should be good to start your VM. Open Windows Search and type `Turn Windows features On/Off` and install everything in the first Hyper-V section. Reboot the VM and you're all done. You can use [this](apps/pafish.exe) tool to check how stealthy the Virtual Machine is.
 
-## Patching the Kernel and qemu (Arch only)
-**USE THESE AT YOUR OWN RISK!! IF YOU GET BANNED FROM GAMES THAT DETECT THIS STUFF IT IS NOT MY FAULT**
+## Patching the Kernel
 
-The guide will be split into multiple sub guides in this one drop down to keep it all together.
+Wanna pass an extra PAFish test? Luckily for you this table here will let you pick which setup you want to do, (the repo one is suggested as you don't have to do much work)
 
-### Kernel Patching
-> The following guide is for patching your kernel and passing rdtscp checks on PAFish.
-        
-> This guide will be going over Arch's kernel build method as seen on the [Arch Wiki](https://wiki.archlinux.org/title/Kernel/Arch_Build_System) and the patch file is for the zen kernel.
+=== "Use my repo"
 
-#### Recompiling your kernel
-First thing is grabbing the source code. Luckily on arch there are very easy ways to do this. Running `asp update linux-zen` will grab the latest build files and doing `asp export linux-zen`. You can replace linux with any package to grab the latest build files of said package, just in case you wanna compile everything yourself.
-        
-After grabbing the source next you want to make a little build directory for everything, I have mine at `~/Projects/kernel/linux-zen`
-    
-Then download [this patch](https://raw.githubusercontent.com/46620/patches/master/kvm.patch) and put it in the folder with the `PKGBUILD` file. (Note that the patch was made for version 5.15.13-zen1, but should work on the latest version)
+    So you don't wanna compile your own kernel? I gotchu, I made an arch repo with the zen-kernel built and ready with the patches needed.
 
-!!! info
-    The patch is only updated when it actually breaks. Please check when it was last modified in my [patch repo](https://github.com/46620/patches) to see how old it might be.
-    
-Next you're going to edit the `PKGBUILD` file and add the patch into it (example below) and [disable building docs](https://wiki.archlinux.org/title/Kernel/Arch_Build_System#Avoid_creating_the_doc), after you add it run `updpkgsums` and then `makepkg -si`.
-    
-```
-    source=(
-        "$_srcname::git+https://github.com/zen-kernel/zen-kernel?signed#tag=$_srctag"
-        config         # the main kernel config file
-        kvm.patch # add this line
-    )
-```
+    First run the following commands to add my keyring to your system.
 
-After you reboot, edit your VM's XML and add `<feature policy="disable" name="rdtscp"/>` to the CPU block.
+    ```bash
+    sudo pacman-key --recv-keys 71060F3E4998281A
+    sudo pacman-key --lsign 12D08400A54A5B2F
+    wget https://cdn.discordapp.com/attachments/983887063113945088/1025519643399553045/46620-keyring-20220930-1-any.pkg.tar.zst
+    sudo pacman -U 46620-keyring-20220930-1-any.pkg.tar.zst
+    ```
 
-#### Using my repo
-Don't wanna compile your own kernel? I gotchu, I made an arch repo with the zen-kernel built and ready with the patches needed.
+    Edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
 
-First run these 2 commands to add my key to your system
+    ```
+    [46620-repo]
+    Server = https://gitlab.com/46620/$repo/-/raw/master/$arch
+    ```
 
-```bash
-sudo pacman-key --recv-keys 71060F3E4998281A
-sudo pacman-key --lsign 12D08400A54A5B2F
-```
+    After that, install `linux-zen-kvm` and `linux-zen-kvm-headers`, update your grub config `sudo grub-mkconfig -o /boot/grub/grub.cfg` to pick up the new kernel, and then reboot and select the kernel on startup.
 
-Edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
+=== "Manually compiling your kernel"
 
-```
-[46620-repo]
-Server = https://gitlab.com/46620/$repo/-/raw/master/$arch
-```
+    > This will be going over Arch's kernel build method as seen on the [Arch Wiki](https://wiki.archlinux.org/title/Kernel/Arch_Build_System) and the patch file is for the zen kernel, but should work on any kernel with a tweak of the file path.
 
-After that, install `linux-zen-kvm` and `linux-zen-kvm-headers` and you should have the patch applied, then just add the XML line and everything should work.
+    First install the `pacman-contrib` package to grab the `asp` command, it'll help with source code management. Next grab the source code. Running `asp update linux-zen` will grab the latest build files and doing `asp export linux-zen`. You can replace linux with any package to grab the latest build files of said package, just in case you wanna compile everything yourself.
 
-### QEMU Patching
-> The following guide will try to mask some generic QEMU names so the Virtual Machine won't detect them.
+    After grabbing the source next you want to make a little build directory for everything, I have mine at `~/Projects/kernel/linux-zen`
 
-For this we actually wanna use the [qemu-git](https://aur.archlinux.org/packages/qemu-git/) AUR package as it is easier to work with.
+    Then download [this patch](https://raw.githubusercontent.com/46620/patches/master/kvm.patch) and put it in the folder with the `PKGBUILD` file.
 
-After cloning it locally, add [this patch](https://raw.githubusercontent.com/46620/patches/master/qemu.patch) and [this patch](https://raw.githubusercontent.com/46620/patches/master/edk2.patch) to the root folder and edit the PKGBUILD to make source and prepare similar to the following.
+    Note that the patch was made for version 5.18.x-zen1, and still works as of writing (5.19.9-zen1). If/when it breaks I will attempt to update the patch within a day.
 
-!!! info
-    The patches are only updated when they actually break. Please check when they were last modified in my [patch repo](https://github.com/46620/patches) to see how old they might be.
+    !!! info "Compile faster"
+        Arch's default compile flags are kinda dog water and slow, you can edit `/etc/makepkg.conf` and uncomment the `MAKEFLAGS` line and change it to match your needs.
 
-```
-...
-source=(git://git.qemu.org/qemu.git
-    qemu-guest-agent.service
-    65-kvm.rules
-    qemu.patch # added
-    edk2.patch # added
-)
-...
-prepare() {
-    cd "${srcdir}/${_gitname}"
-    mkdir build-{full,headless}
-    git submodule init; git submodule update # added
-    cd .. # added
-    patch -p1 < qemu.patch # added
-    patch -p1 --binary < edk2.patch # added
-      cd "${srcdir}/${_gitname}" # added
-    mkdir -p extra-arch-{full,headless}/usr/{bin,share/qemu}
-}
-```
-
-After doing that run `updpkgsums` and then `makepkg -s`. Install the packages you need from what it builds, you can't use `makepkg -si` as qemu-headless and qemu conflict with each other.
-
-!!! warning
-    After compiling a new version of qemu, restart libvirtd and remake your Virtual Machine, you can leave the old one there, just set the storage to the old drive and copy any XML edits you made, this is just to make sure that if the patch breaks anything, you still have your original to restore to.
-
-!!! info "Compile faster"
-    Arch's default compile flags are kinda dog water and slow, you can edit `/etc/makepkg.conf` and uncomment the `MAKEFLAGS` line and change it to match your needs.
-        
     Also for compiling the kernel, you should set up [modprobed-db](https://wiki.archlinux.org/title/Modprobed-db) to cut the compile time (and size) by at least half.
+
+    Next you're going to edit the `PKGBUILD` file and add the patch into it (example below) and [disable building docs](https://wiki.archlinux.org/title/Kernel/Arch_Build_System#Avoid_creating_the_doc), after you add it run `updpkgsums` and then `makepkg -si`.
+
+    ```
+        source=(
+            "$_srcname::git+https://github.com/zen-kernel/zen-kernel?signed#tag=$_srctag"
+            config         # the main kernel config file
+            kvm.patch # add this line
+        )
+    ```
+
+---
+
+After you reboot, edit your VM's XML and add `<feature policy="disable" name="rdtscp"/>` to the CPU block and you should pass yet another PAFish test.
