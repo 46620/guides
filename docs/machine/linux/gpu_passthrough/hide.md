@@ -74,15 +74,15 @@ Wanna pass an extra PAFish test? Luckily for you this table here will let you pi
     ```bash
     sudo pacman-key --recv-keys 71060F3E4998281A
     sudo pacman-key --lsign 12D08400A54A5B2F
-    wget https://cdn.discordapp.com/attachments/983887063113945088/1025519643399553045/46620-keyring-20220930-1-any.pkg.tar.zst
+    wget https://cdn.discordapp.com/attachments/983887063113945088/1029189673953800234/46620-keyring-20220930-1-any.pkg_1.tar.zst
     sudo pacman -U 46620-keyring-20220930-1-any.pkg.tar.zst
     ```
 
-    Edit your `/etc/pacman.conf` and add the following above all other repos (so it gets priority when downloading the package)
+    Edit your `/etc/pacman.conf` and add the following block
 
     ```
     [46620-repo]
-    Server = https://gitlab.com/46620/$repo/-/raw/master/$arch
+    Server = https://repo.46620.moe/$arch
     ```
 
     After that, install `linux-zen-kvm` and `linux-zen-kvm-headers`, update your grub config `sudo grub-mkconfig -o /boot/grub/grub.cfg` to pick up the new kernel, and then reboot and select the kernel on startup.
