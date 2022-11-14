@@ -1,5 +1,5 @@
 # GPU Passthrough setup
-> Last update: 2022-05-26
+> Last update: 2022-11-13
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
 
@@ -12,13 +12,45 @@ GPU passthrough will need some stuff installed in order to work. Running the fol
 > I've only fully tested on Arch and just swapped what packages needed to be installed for each distro, if there's an issue with one, please let me know.
 
 ??? info "Arch based distros"
-    ```bash
-    sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers
-    sudo systemctl enable --now libvirtd.service
-    sudo virsh net-autostart default
-    sudo virsh net-start default
-    sudo usermod -aG kvm,input,libvirt <your_name>
-    ```
+    === "Standard pacman"
+        ```bash
+        sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers
+        sudo systemctl enable --now libvirtd.service
+        sudo virsh net-autostart default
+        sudo virsh net-start default
+        sudo usermod -aG kvm,input,libvirt <your_name>
+        ```
+    === "Meta Package (WIP)"
+
+        **THE META PACKAGES DO NOT EXIST CURRENTLY!! DO NOT USE THIS UNTIL THIS MESSAGE IS REMOVED**
+
+        These packages set up your system with (to my knowledge please tell me if it's broken).
+
+        First run the following commands to add my keyring to your system.
+
+        ```bash
+        sudo pacman-key --recv-keys 71060F3E4998281A
+        sudo pacman-key --lsign 12D08400A54A5B2F
+        wget https://cdn.discordapp.com/attachments/983887063113945088/1029189673953800234/46620-keyring-20220930-1-any.pkg_1.tar.zst
+        sudo pacman -U 46620-keyring-20220930-1-any.pkg.tar.zst
+        ```
+
+        Edit your `/etc/pacman.conf` and add the following block
+
+        ```
+        [46620-repo]
+        Server = https://repo.46620.moe/$arch
+        ```
+
+        After that, install `46620-kvm-nvidia` or `46620-kvm-amd`, and then run the following commands
+        ```bash
+        sudo pacman -S qemu libvirt edk2-ovmf virt-manager iptables-nft dnsmasq linux-headers
+        sudo systemctl enable --now libvirtd.service
+        sudo virsh net-autostart default
+        sudo virsh net-start default
+        sudo usermod -aG kvm,input,libvirt <your_name>
+        ```
+
 
 ??? info "Ubuntu"
     ```bash
@@ -80,7 +112,7 @@ While doing this, copy all the text for your GPUs IOMMU group and save it to a f
 
 ## Setting up the VM
 ### Downloads
-You're gonna need 2 things, A copy of [Windows](https://www.microsoft.com/en-us/software-download/windows10ISO) and the [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/archive-virtio/virtio-win-0.1.215-2/virtio-win-0.1.215.iso) drivers. Clicking them will either download or bring you to a download page.
+You're gonna need 2 things, A copy of [Windows](https://www.microsoft.com/en-us/software-download/windows10ISO) and either stable or latest [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) drivers, that's up to you. Clicking them will bring you to a download page.
 
 ### Setting up virt manager and all that stuff
 This is recommended to do before all of this is to enable XML editing in virt managers settings. Open "Virtual Machine Manager" and click "Edit". Enable XML editing and hit close.
