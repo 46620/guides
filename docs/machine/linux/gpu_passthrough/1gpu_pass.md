@@ -1,9 +1,11 @@
 # Single GPU passthrough
+
 > Last updated: 2022-05-26
 
 ## Notices
+
 !!! warning
-    This guide is less of a full "here's how everything works" and more of a jumpstart into this. **PLEASE DO RESEARCH AND DO NOT RELY ON THIS ALONE** All pages I use will be at the bottom in the credits. 
+    This guide is less of a full "here's how everything works" and more of a jumpstart into this. **PLEASE DO RESEARCH AND DO NOT RELY ON THIS ALONE** All pages I use will be at the bottom in the credits.
 
 !!! info "Current setup"
     The following guide is largely based on these dependencies, please make sure to change certain steps for your build. Read the credits for help.
@@ -13,28 +15,33 @@
     *    An AMD CPU
 
 ## QEMU hooks
+
 You ready to learn the wonders of qemu hooks? Cause if not you really don't have a choice.
 
 ### Installing
+
 To get started you need to make a few folders for the hooks so run `sudo mkdir -p /etc/libvirt/hooks` to make said folders.
 
 Next thing you want to do is download the hook manager itself by running the following commands:
 
-``` bash
+```bash
 sudo wget 'https://raw.githubusercontent.com/PassthroughPOST/VFIO-Tools/master/libvirt_hooks/qemu' \
      -O /etc/libvirt/hooks/qemu
 sudo chmod +x /etc/libvirt/hooks/qemu
 sudo systemctl restart libvirtd
 ```
+
 And there ya go, you've now installed the manager for the hooks.. time to write them.
 
 ### Making your own hooks
+
 This section is annoying but honestly kinda my favorite. We now have to write the scripts that will tell our computer to give the virtual machine the graphics card. 
 
 I hope you know what your VM is called cause now would be the time to know the name.
 
-To get started you want to make the folder structure below: 
-```
+To get started you want to make the folder structure below:
+
+```text
 /etc/libvirt/hooks
 ├── qemu
 └── qemu.d
@@ -48,12 +55,13 @@ To get started you want to make the folder structure below:
 With your folders created now we need to make some scripts. You need to put the scripts in the proper begin/end folder for their jobs. Below are some examples with the path of them as the name. You can use these examples but you need to remember to change certain things for your builds, like your dm, vtcons, and drivers.
 
 ??? info "/etc/libvirt/hooks/kvm.conf"
-    ```
+    ```text
     VIRSH_GPU_VIDEO=pci_0000_05_00_0
     VIRSH_GPU_AUDIO=pci_0000_05_00_1
     VIRSH_GPU_USB=pci_0000_05_00_2
     VIRSH_GPU_SERIAL=pci_0000_05_00_3
     ```
+
 You might be wondering what those numbers are in that file? It's the numbers we got from our IOMMU groupings earlier. the `pci_0000` part is required.
 
 ??? info "/etc/libvirt/hooks/qemu.d/<vm_name\>/prepare/begin/start.sh"
@@ -108,7 +116,7 @@ You might be wondering what those numbers are in that file? It's the numbers we 
     ``` bash
     # File based on "SomeOrdinaryGamers" scripts.
     # Anything labeled with a * in the comment needs to be edited by you to work with your setup
-    
+
     # debugging
     set -x
     
@@ -160,7 +168,9 @@ Make sure that all the scripts are runable by doing `sudo chmod +x /path/to/each
 Once that's all done you can test them by running the start script, if you're screen goes black then boom it worked and you did it right. Now go hold the power button down to restart it so you can continue.
 
 ## Hijacking a GPU
+
 ### Patching the GPU
+
 >This step is not required for all GPUs. I'm covering it for most NVIDIA cards just to make it easier if you actually need it.
 
 First thing you're gonna wanna do is get the file you dumped in [this step](1gpu_pass.md#before-installing-linux) and put it somewhere you will remember. I put mine in a `vbios` folder in my `Documents` directory.
@@ -176,6 +186,7 @@ Open the file and hit `CTRL+F` and type "VIDEO" and and search as Text. Find the
     ![04_gpu_patch](img/1gpu_pass/04_gpu_patch.png)
 
 ### Attaching the GPU to the VM
+
 This is my least favorite part as it just takes time and is annoying as shit to do.
 
 To start this step go ahead and attach all of your GPU stuff to your VM by clicking `Add Hardware > PCI Host Device` and adding everything for the GPU.. one at a time. After you do that click on one of the devices and go to `XML` under `</source>` add a line similar to this for your patched vBIOS `<rom file="/path/to/vbios/file.rom"/>`. It should look similar to the photo below
@@ -186,12 +197,14 @@ After you do it to one of them.. Do it to the rest of them. That's right folks y
 
 After you do this go to the option that says `Video QXL`, click it and replace "QXL" with "none".
 
-After you do that start the VM and watch as your screens go black and you should boot to Windows 10. 
+After you do that start the VM and watch as your screens go black and you should boot to Windows 10.
 
 ## Hiding the VM
+
 If you would like to try to mask the VM, check out [hiding](../hide) the VM.
 
 ## Ending comments
+
 This guide might not be the best or work for everyone, please see the credits below. I hope that this at least makes some sense to someone and they're able to use this to help them set up a "perfect" gaming VM.
 
 !!! tldr "Credits"

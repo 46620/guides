@@ -1,4 +1,5 @@
 # GPU Passthrough setup
+
 > Last update: 2023-04-06
 
 So you wanna game but you also wanna use Linux? That's understandable. This guide should help you with that.
@@ -7,6 +8,7 @@ So you wanna game but you also wanna use Linux? That's understandable. This guid
     If you are still on Windows while reading this, dump your GPUs vBIOS using [GPUz](https://www.techpowerup.com/gpuz/). You're gonna need it in a much later step. Just back it up and keep it somewhere you can get to later.
 
 ## Dependencies
+
 GPU passthrough will need some stuff installed in order to work. Running the following list of commands will install everything for you.
 
 > I've only fully tested on Arch and just swapped what packages needed to be installed for each distro, if there's an issue with one, please let me know.
@@ -48,6 +50,7 @@ GPU passthrough will need some stuff installed in order to work. Running the fol
     ```
 
 ## Enable & Verify IOMMU
+
 Before you start setting up VMs, go to your BIOS and enable either Intel VT-d or AMD-Vi + IOMMU depending on your processor and motherboard.
 
 After enabling that in your BIOS you're now gonna have to edit grub and add either one of the following depending on your processor:
@@ -74,18 +77,23 @@ for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
     done;
 done;
 ```
+
 If there are devices in the group that you don't wanna pass, you will need to do [ACS patching](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)), which is out of the scope of this project, follow the guide linked.
 
 While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find. You will need it for a later step.
 
 ## Setting up the VM
+
 ### Downloads
+
 You're gonna need 2 things, A copy of [Windows](https://www.microsoft.com/en-us/software-download/windows10ISO) and either stable or latest [virtio](https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/) drivers, that's up to you. Clicking them will bring you to a download page.
 
 ### Setting up virt manager and all that stuff
+
 This is recommended to do before all of this is to enable XML editing in virt managers settings. Open "Virtual Machine Manager" and click "Edit". Enable XML editing and hit close.
 
 #### Setting up the Virtual Machine
+
 Aight this is the fun part, click `"New VM" > Local install media > Browse > Browse Local` and select the ISO you download for Windows 10. If it asks for search permission give it permission. Whatever it asks of you give it.
 
 Next is memory and CPUs, I gave it half of my RAM and all but 2 cores of my CPU.
@@ -111,6 +119,7 @@ Last add another CDROM for the virtio iso.
 After that you can hit Begin Installation.
 
 #### The First boot/Install
+
 Once you hit begin installation, and when it asks you to press any button to boot from CD, press something. Go through the setup until you're asked how you want to do the install.
 
 Select Custom and select your... oh wait there's no disk. Hit "Load driver" and install the win10 driver. Then select your disk and do your standard windows 10 install.
@@ -118,6 +127,7 @@ Select Custom and select your... oh wait there's no disk. Hit "Load driver" and 
 Once you're at the desktop, open file explorer and install the drivers from the virtio CD. Once that is complete you can shut down the VM.
 
 #### Cleaning up the VM details
+
 This is a small section to just make management later a bit easier.
 
 In your VM details go to "Boot Options" and disable the CDROM options.
@@ -125,6 +135,7 @@ In your VM details go to "Boot Options" and disable the CDROM options.
 Next remove both CDROMS (you can delete the files if you want).
 
 ## What kind of VM
+
 If you only have one GPU, it's recommended to do the [Single GPU passthrough](../1gpu_pass) guide
 
 If you have 2 GPUs in the same build, the [Multi GPU](../2gpu_pass) guide is a good option

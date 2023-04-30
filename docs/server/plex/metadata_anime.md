@@ -1,4 +1,5 @@
 # Anime Metadata
+
 Getting proper metadata for anime is a fucking bitch let me tell you. I've been hosting a media server since August 30th, 2018 and I still can't get this down properly, but this part is the knowledge I've gathered over the years to hopefully make it easier.
 
 !!! info "Notice"

@@ -2,7 +2,8 @@
 
 This section will be all about preparing your computer to migrate to Linux is a mostly seemless way possible.
 
-## Backups!
+## MAKE BACKUPS
+
 **BACKUPS! BACKUPS! BACKUPS! MAKE. FUCKING. BACKUPS!**
 
 Make ya damn backups! This step is different for everyone cause we all store different things on our systems. Just make sure to back up **EVERYTHING** you will want (and if you're planning on running a Windows VM on your systm, backup your GPUs BIOS to be able to modify it later on).

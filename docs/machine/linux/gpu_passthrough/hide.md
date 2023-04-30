@@ -1,10 +1,12 @@
 # Hiding the Virtual Machines (Unsupported)
+
 > Last updated: 2022-09-30
 
 !!! error "NOTICE"
     BattlEye and EAC will ban if you're caught with these. Don't bitch and complain if you're banned, just comlain that they made their linux compatibility opt in, not opt out.
 
 ## QEMU configs
+
 This is for if you already have a working windows VM. This is a very easy thing to set up. I have my entire xml file in [this](https://github.com/46620/kvm-passthrough) repo if you wanna base it off of that, but below is all I needed to add to get mine working.
 
 First things first, make sure that you set your CPU to be to pass the model to the VM so it doesn't show up as the wrong CPU type.
@@ -28,7 +30,7 @@ First we need to edit HyperV, edit your HyperV section to look similar to this, 
       <vendor_id state="on" value="buttplug"/>
       <frequencies state="on"/>
     </hyperv>
-``` 
+```
 
 Right below that add this section for KVM
 

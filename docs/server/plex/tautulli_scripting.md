@@ -3,6 +3,7 @@
 Aight now we get to the fun part, actually setting up scripts. I'm gonna go over one script here as I use it the most.
 
 ## PlexAniSync
+
 My friends and I watch a lot of anime and keeping our Anilist accounts up to date is like 4 more clicks than we feel like. The solution? [PlexAniSync](https://github.com/RickDB/PlexAniSync).
 
 ### Installing
@@ -20,6 +21,7 @@ Installation is very easy, clone the repo somewhere and yell at tautulli to look
 Fun thing: if you do this for multiple users, no config will ever be the same. Follow their [config guide](https://github.com/RickDB/PlexAniSync#step-3---configuration) to set up the configs. If you name your config file differently, you can call it by doing `python PlexAniSync.py <config.ini>`.
 
 ### Custom mapping
+
 Say you got a large media library and you did the smart thing of merging different seasons into one show to be able to find everything under one name. Now you got the new shit to deal with.. Custom Mapping.
 
 That's right, the script *at least it used to idk how good it is now* failed when things were merged into series and not separate series. The solution? `custom_mappings.yaml`. With this file you can make everything detected how you want it. I have an example [here](https://github.com/46620/custom-mappings) with my current library, and a cron file if you want to use it. I'd recommend setting up the cronjob if you do use it as I try to update that file as often as I can with how I have shows set up.

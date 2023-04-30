@@ -20,6 +20,7 @@ docker run -d \
  --restart=unless-stopped \
  jellyfin/jellyfin:unstable
 ```
+
 > I personally run unstable builds as they're just as stable as stable.. so shut your mouth
 
 After this, spend some time to set up your libraries, metadata, and (if you want), set up a [custom theme](https://jellyfin.org/docs/general/clients/css-customization.html).

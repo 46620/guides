@@ -18,6 +18,7 @@ docker run \
 -v /media:/data \
 plexinc/pms-docker:plexpass
 ```
+
 > The plexpass tag will only be in effect if you have PlexPass, if not it will use the public release.
 
 ??? info "Adding an NVIDIA GPU"
