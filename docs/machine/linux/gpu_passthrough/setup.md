@@ -78,9 +78,13 @@ for g in `find /sys/kernel/iommu_groups/* -maxdepth 0 -type d | sort -V`; do
 done;
 ```
 
-If there are devices in the group that you don't wanna pass, you will need to do [ACS patching](https://wiki.archlinux.org/title/PCI_passthrough_via_OVMF#Bypassing_the_IOMMU_groups_(ACS_override_patch)), which is out of the scope of this project, follow the guide linked.
-
 While doing this, copy all the text for your GPUs IOMMU group and save it to a file somewhere to easily find. You will need it for a later step.
+
+If there are devices in groups that you don't want to passthrough, you will need to do ACS patching, which is in the step beloiw
+
+### ACS patching (Optional)
+
+If you need to do ACS patching, add `pcie_acs_override=downstream,multifunction` to your grub config and regenerate it with `grub-mkconfig -o /boot/grub/grub.cfg`, and then reboot. That should break up the groups.
 
 ## Setting up the VM
 
