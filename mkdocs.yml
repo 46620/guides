@@ -31,8 +31,11 @@ nav:
             - GPU Passthrough:
                 - 'Requirements': 'machine/linux/gpu_passthrough/setup.md'
                 - 'Single GPU passthrough': 'machine/linux/gpu_passthrough/1gpu_pass.md'
-                - 'Not Single GPU passthrough': 'machine/linux/gpu_passthrough/2gpu_pass.md'
-                - 'Masking the VM': 'machine/linux/gpu_passthrough/hide.md'
+                - 'Not Single GPU passthrough': 'machine/linux/gpu_passthrough/2gpu_pass.md's
+        - General Guides:
+            - Piracy:
+                - 'Introduction': 'machine/piracy/Introduction.md'
+                - 'Software': 'machine/piracy/Software.md'
 
 
 markdown_extensions:

@@ -1,6 +1,6 @@
 # Single GPU passthrough
 
-> Last updated: 2022-05-26
+> Last updated: 2023-06-05
 
 ## Notices
 
@@ -198,10 +198,6 @@ After you do it to one of them.. Do it to the rest of them. That's right folks y
 After you do this go to the option that says `Video QXL`, click it and replace "QXL" with "none".
 
 After you do that start the VM and watch as your screens go black and you should boot to Windows 10.
-
-## Hiding the VM
-
-If you would like to try to mask the VM, check out [hiding](../hide) the VM.
 
 ## Ending comments
 

@@ -1,6 +1,6 @@
 # Not Single GPU passthrough
 
-> Last updated: 2022-05-26
+> Last updated: 2023-06-05
 
 Have an extra GPU and don't need the other guide? Perfect, after bribing AMD at PAX 2022 with like.. $700 I was able to get a second card for my machine to do this.
 
@@ -79,10 +79,6 @@ Start the VM and you should notice you can still use your keyboard and mouse in 
 Run the `looking-glass-client` you compiled earlier and when the VM is fully booted, you should see the virtual machine.
 
 Hold Scroll Lock to see the keybinds you can use, `ScrLk + F` will full screen the VM, while hitting just `ScrLk` will lock your mouse and most keyboard inputs the the VM.
-
-## Hiding the VM
-
-If you would like to try to mask the VM, check out [hiding](../hide) the VM.
 
 !!! tldr "Credits"
     [Hiding the VM](https://www.youtube.com/watch?v=rrlpg6F82S4)
