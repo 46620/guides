@@ -26,7 +26,7 @@ If you understand computers a bit more and have tinkered with Linux in the past,
 
 Installing arch has gotten a lot simpler with archinstall. archinstall is the fucking best thing ever. Imaging everything about arch but with the simple install setup as other Operating Systems.
 
-When you boot the iso and you verify you have internet and that you're booted into UEFI if you choose to be, run `archinstall` and go through each section and select what you want to use. (I will write a more detailed description of this later on
+When you boot the iso and you verify you have internet and that you're booted into UEFI if you choose to be, run `archinstall` and go through each section and select what you want to use. (I will write a more detailed description of this later on)
 
 ---
 
